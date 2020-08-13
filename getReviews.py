@@ -7,9 +7,12 @@ import os
 
 total_page = 5
 data_df = pd.DataFrame(columns=["Reviews","Date","Rating"])
+name_sufix= 1
 
 def process_url(url: str):
-    url = re.sub("(\/dp\/)","/product-reviews/", url)
+    url = re.search(r".+(\/dp\/).+(\/)", url)
+    url = url.group(0)
+    url = re.sub(r"(\/dp\/)","/product-reviews/", url)
     return url
 
 
@@ -17,8 +20,14 @@ def get_request(path:str):
     """
     Get the request from the url passed in path -> str
     """
-    res = requests.get(path)
-    return res
+    try:
+        res = requests.get(path)
+        while(res.status_code != 200):
+            res = requests.get(path)
+        return res
+    except:
+        print("Error in gettng request")    
+    return None
 
 
 def get_data(soup:bs4.BeautifulSoup):
@@ -27,6 +36,8 @@ def get_data(soup:bs4.BeautifulSoup):
     """
     rows = soup
     global data_df
+
+    
     for row in rows:
         reviews = row.find('span', {'class':'a-size-base review-text review-text-content'}).text
         star = row.find("span", {"class": "a-icon-alt"}).text
@@ -34,8 +45,7 @@ def get_data(soup:bs4.BeautifulSoup):
         data = [{"Reviews":reviews,
                  "Date":date[21::],
                  "Rating":star[0]
-                 }]
-
+                 }]        
         data_df = data_df.append(data)
 
 
@@ -47,7 +57,7 @@ def scrape(url:str):
     stars = ["five_star","four_star","three_star","two_star","one_star"]
 
     for i in range(total_page):
-        adder = f"/ref=cm_cr_getr_d_paging_btm_next_2?ie=UTF8&reviewerType=all_reviews&filterByStar={stars[i]}&pageNumber={1}"
+        adder = f"ref=cm_cr_getr_d_paging_btm_next_2?ie=UTF8&reviewerType=all_reviews&filterByStar={stars[i]}&pageNumber={1}"
         link = url+adder
         res = get_request(link)
         soup = bs4.BeautifulSoup(res.text,"lxml")
@@ -58,8 +68,12 @@ def scrape(url:str):
 
 def save_data():
     global data_df
-    data_df.to_csv("./reviews.csv")
-    return os.getcwd()+"/reviews.csv"
+    global name_sufix
+    data_df.to_csv(f"./reviews_{name_sufix}.csv")
+    saving_path = os.getcwd()+f"/reviews_{name_sufix}.csv"
+    name_sufix += name_sufix
+    return saving_path
+    
 
 
 

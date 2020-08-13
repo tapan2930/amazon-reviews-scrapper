@@ -4,27 +4,44 @@ import getReviews as gr
 app = typer.Typer()
 
 @app.command()
-def start(url: str):
-    typer.echo("")	
-    message = typer.style("Welcome, You are one hell of a LUCKY GOOSE, 😏😏😏😏", fg=typer.colors.MAGENTA, bold=True)
-
-    typer.echo(message)
+def start():
+    echo_color("⭐⭐⭐⭐⭐ Amazon Reviews Scrapper Started ⭐⭐⭐⭐⭐",color=typer.colors.MAGENTA, bold=True)
     typer.echo("")
     typer.echo("Initializing....")
+    running = True
 
+    while(running):
+
+        process()
+        echo_color("Continue....(Y(yes) - N(No)):", color=typer.colors.BRIGHT_GREEN, bold=True)
+        retry = input()
+        if(retry.lower() != "y" and retry.lower() != "yes"):
+
+            running = False
+        
+    
+
+
+def process():
+    print()
+    print("URL:", end=" ")
+    url = input()
     url = gr.process_url(url)
 
     total = 0
     with typer.progressbar(gr.scrape(url), length=gr.total_page, label="Scraping ") as progress:
         for value in progress:
             total = total+1
-    typer.echo(f"Scraping Done...")
-    typer.echo("Saving Data ito cvs....")
+    echo_color("Scraping Done...", color=typer.colors.BLUE)
+    echo_color("Saving Data to cvs....", color=typer.colors.BLUE)
     saved_path = gr.save_data()
-    csv_path = typer.style(saved_path, fg=typer.colors.GREEN)
-    typer.echo(csv_path)
-    typer.echo("Completed...")
+    echo_color(saved_path, color=typer.colors.GREEN)
+    echo_color("Completed...👍", color=typer.colors.BLUE)
+    
 
+def echo_color(text:str, bold:bool = False, color=typer.colors.WHITE):
+    echo = typer.style(text, fg=color, bold=bold, blink=True)
+    typer.echo(echo)
 
 if __name__ == "__main__":
     app()
