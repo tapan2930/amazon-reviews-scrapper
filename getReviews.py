@@ -5,9 +5,11 @@ import pandas as pd
 import re
 import os
 
+
+
 total_page = 5
 data_df = pd.DataFrame(columns=["Reviews","Date","Rating"])
-name_sufix= 1
+
 
 def check_url(url: str):
     if url == None:
@@ -79,10 +81,8 @@ def scrape(url:str):
 
 def save_data():
     global data_df
-    global name_sufix
-    data_df.to_csv(f"./reviews_{name_sufix}.csv")
-    saving_path = os.getcwd()+f"/reviews_{name_sufix}.csv"
-    name_sufix += name_sufix
+    data_df.to_csv(f"./reviews.csv")
+    saving_path = os.getcwd()+f"/reviews.csv"
     return saving_path
     
 
